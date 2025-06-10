@@ -27,7 +27,7 @@ COPY portfolio/backend/package*.json ./
 RUN npm install
 COPY portfolio/backend ./
 
-COPY --from=frontend-build /app/frontend/build ./public
+COPY --from=frontend-build /app/frontend/dist ./public
 
 EXPOSE 3000
 CMD ["npm", "start"]
