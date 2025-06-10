@@ -1,18 +1,19 @@
-FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
-COPY portfolio/frontend/package*.json ./
-RUN npm install
-COPY portfolio/frontend ./
-RUN npm run build
+# In site/Dockerfile
+FROM node:18-alpine
 
-FROM node:18-alpine AS production
 WORKDIR /app
 
-COPY portfolio/backend/package*.json ./
+# Copy backend
+COPY portfolio/backend ./backend
+# Copy frontend build (you'll need to build it first)
+COPY portfolio/frontend/build ./frontend/build
+
+# Install backend dependencies
+WORKDIR /app/backend
 RUN npm install
-COPY portfolio/backend ./
 
-COPY --from=frontend-build /app/frontend/build ./public
-
+# Expose port
 EXPOSE 3000
+
+# Start the backend (which should serve the frontend)
 CMD ["npm", "start"]
