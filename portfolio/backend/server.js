@@ -69,6 +69,6 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3001, () => {
-  console.log("Server listening on port 3001");
+httpServer.listen("3001", () => {
+  console.log(`Server listening on port 3001`);
 });

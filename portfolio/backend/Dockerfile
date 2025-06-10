@@ -4,7 +4,7 @@ WORKDIR /build
 COPY shell/shell.c .
 RUN gcc -o shell shell.c
 
-FROM node:22
+FROM node:18
 
 WORKDIR /app
 
