@@ -29,6 +29,6 @@ COPY portfolio/backend ./
 
 COPY --from=frontend-build /app/frontend/dist ./public
 
-EXPOSE 3000
+EXPOSE 3001
 CMD ["npm", "start"]
 
