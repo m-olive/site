@@ -116,25 +116,19 @@ const PortfolioSite = () => {
         title: "Interactive C Shell",
         description:
           "Custom Unix shell implementation with job control, piping, redirection, and command history.",
-        tech: ["C, ", "Docker, ", "WebSocket"],
-        codeUrl: "https://github.com/m-olive/shell",
-        demoUrl: "https://your-demo-site.com",
+        tech: ["C", "Docker", "WebSocket"],
       },
       {
         title: "Portfolio Site",
         description:
           "Simple website made in React with Node.js serving an embedded Docker container",
-        tech: ["React, ", "Node.js, ", "Docker"],
-        codeUrl: "https://github.com/m-olive/site",
-        demoUrl: "https://your-portfolio.com",
+        tech: ["React", "Node.js", "Docker", "C"],
       },
       {
         title: "Placeholder",
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        tech: ["Java, ", "Spring Boot"],
-        codeUrl: "https://github.com/yourusername/placeholder-project",
-        demoUrl: "",
+        tech: ["Java", "Spring Boot"],
       },
     ];
 
@@ -142,60 +136,33 @@ const PortfolioSite = () => {
       <section className="section projects">
         <div className="container">
           <h2 className="section-title">Projects</h2>
-          <div style={{ marginBottom: "2rem" }}></div>
           <div className="projects-grid">
             {projects.map((project, index) => (
               <div key={index} className="project-card">
                 <div className="project-image">
                   <Briefcase size={48} />
                 </div>
-                <div style={{ marginBottom: ".5rem" }}></div>
                 <div className="project-content">
                   <h3 className="project-title">{project.title}</h3>
                   <p className="project-description">{project.description}</p>
                   <div className="project-tech">
-                    Technology used:{" "}
                     {project.tech.map((tech, techIndex) => (
                       <span key={techIndex} className="tech-tag">
                         {tech}
                       </span>
                     ))}
                   </div>
-                  <div style={{ marginBottom: ".5rem" }}></div>
                   <div className="project-links">
-                    <button
-                      className="project-link"
-                      onClick={() => {
-                        if (project.codeUrl) {
-                          window.open(
-                            project.codeUrl,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }
-                      }}
-                    >
+                    <button className="project-link">
                       <Github size={16} />
                       <span>Code</span>
                     </button>
-                    <button
-                      className="project-link"
-                      onClick={() => {
-                        if (project.demoUrl) {
-                          window.open(
-                            project.demoUrl,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }
-                      }}
-                    >
+                    <button className="project-link">
                       <ExternalLink size={16} />
                       <span>Demo</span>
                     </button>
                   </div>
                 </div>
-                <div style={{ marginBottom: "1rem" }}></div>
               </div>
             ))}
           </div>
@@ -203,7 +170,6 @@ const PortfolioSite = () => {
       </section>
     );
   };
-
   const TerminalSection = () => {
     const terminalRef = useRef(null);
     const xtermRef = useRef(null);

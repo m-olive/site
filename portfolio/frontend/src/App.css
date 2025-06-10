@@ -253,6 +253,10 @@ body {
   display: block;
 }
 
+.project-link + .project-link {
+	margin-left: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .terminal-content {
     padding: 1rem;

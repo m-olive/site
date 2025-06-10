@@ -242,7 +242,6 @@ void exec_cmd(char *input) {
       printf("%d: %s\n", i + 1, history[i]);
     }
     free_args(args);
-    add_to_history(input);
     return;
   }
 
