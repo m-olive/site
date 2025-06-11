@@ -211,10 +211,23 @@ const PortfolioSite = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isRunning, setIsShellRunning] = useState(false);
     const [connectionError, setConnectionError] = useState("");
+    const reconnectTimeoutRef = useRef(null);
 
-    useEffect(() => {
-      const newSocket = io("http://localhost:3001", {
+    const connectWebSocket = () => {
+      if (reconnectTimeoutRef.current)
+        clearTimeout(reconnectTimeoutRef.current);
+
+      if (socket) socket.disconnect();
+
+      console.log("Attempting to connect to WebSocket server...");
+
+      const newSocket = io("https://m-olive.fly.dev", {
         transports: ["websocket", "polling"],
+        timeout: 10000,
+        reconnection: true,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+        maxReconnectionAttempts: 10,
       });
 
       newSocket.on("connect", () => {
@@ -224,16 +237,42 @@ const PortfolioSite = () => {
         setSocket(newSocket);
       });
 
-      newSocket.on("disconnect", () => {
-        console.log("Disconnected from WebSocket server");
+      newSocket.on("disconnect", (reason) => {
+        console.log("Disconnected from WebSocket server:", reason);
         setIsConnected(false);
         setIsShellRunning(false);
+
+        if (reason === "io server disconnect") {
+          setConnectionError("Server disconnected. Attempting to reconnect...");
+        } else if (reason === "transport error") {
+          setConnectionError("Connection lost. Attempting to reconnect...");
+        }
       });
 
       newSocket.on("connect_error", (error) => {
         console.error("Connection error:", error);
-        setConnectionError("Failed to connect to server.");
+        setConnectionError("Failed to connect to server. Retrying...");
         setIsConnected(false);
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log("Attempting manual reconnection...");
+          connectWebSocket();
+        }, 5000);
+      });
+
+      newSocket.on("reconnect", (attemptNumber) => {
+        console.log(`Reconnected after ${attemptNumber} attempts`);
+        setConnectionError("");
+      });
+
+      newSocket.on("reconnect_error", (error) => {
+        console.error("Reconnection failed:", error);
+        setConnectionError("Reconnection failed. Retrying...");
+      });
+
+      newSocket.on("reconnect_failed", () => {
+        console.error("Failed to reconnect after maximum attempts");
+        setConnectionError("Failed to reconnect. Please refresh the page.");
       });
 
       newSocket.on("shell_output", (data) => {
@@ -242,7 +281,15 @@ const PortfolioSite = () => {
         }
       });
 
+      return newSocket;
+    };
+
+    useEffect(() => {
+      const newSocket = connectWebSocket();
+
       return () => {
+        if (reconnectTimeoutRef.current)
+          clearTimeout(reconnectTimeoutRef.current);
         if (newSocket) {
           newSocket.emit("end_shell");
           newSocket.disconnect();
@@ -251,23 +298,24 @@ const PortfolioSite = () => {
     }, []);
 
     useEffect(() => {
-      xtermRef.current = new XTerm({
-        cursorBlink: true,
-        fontFamily:
-          "SF Mono, Monaco, Inconsolata, Roboto Mono, Consolas, Courier New, monospace",
-        fontSize: 14,
-      });
-      xtermRef.current.open(terminalRef.current);
+      if (!xtermRef.current) {
+        xtermRef.current = new XTerm({
+          cursorBlink: true,
+          fontFamily:
+            "SF Mono, Monaco, Inconsolata, Roboto Mono, Consolas, Courier New, monospace",
+          fontSize: 14,
+        });
+        xtermRef.current.open(terminalRef.current);
 
-      xtermRef.current.onData((data) => {
-        if (socket && isRunning) {
-          socket.emit("shell_input", data);
-        }
-      });
+        xtermRef.current.onData((data) => {
+          if (socket && isRunning) socket.emit("shell_input", data);
+        });
+      }
 
       return () => {
         if (xtermRef.current) {
           xtermRef.current.dispose();
+          xtermRef.current = null;
         }
       };
     }, [socket, isRunning]);
@@ -278,6 +326,10 @@ const PortfolioSite = () => {
         xtermRef.current.writeln("Starting shell session...");
         setIsShellRunning(true);
         socket.emit("start_shell");
+      } else {
+        setConnectionError(
+          "Not connected to server. Please wait or refresh the page.",
+        );
       }
     };
 
@@ -285,8 +337,14 @@ const PortfolioSite = () => {
       if (socket) {
         socket.emit("end_shell");
         setIsShellRunning(false);
-        xtermRef.current.writeln("\r\n[Shell session ended by user]");
+        if (xtermRef.current)
+          xtermRef.current.writeln("\r\n[Shell session ended by user]");
       }
+    };
+
+    const manualReconnect = () => {
+      setConnectionError("Reconnecting...");
+      connectWebSocket();
     };
 
     return (
@@ -304,7 +362,22 @@ const PortfolioSite = () => {
               {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
             </div>
             {connectionError && (
-              <div className="connection-error">{connectionError}</div>
+              <div className="connection-error">
+                {connectionError}
+                {!isConnected && (
+                  <button
+                    className="reconnect-btn"
+                    onClick={manualReconnect}
+                    style={{
+                      marginLeft: "10px",
+                      padding: "5px 10px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Reconnect
+                  </button>
+                )}
+              </div>
             )}
             {isConnected && !isRunning && (
               <button className="start-shell-btn" onClick={startShell}>
