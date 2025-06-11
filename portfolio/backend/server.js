@@ -41,7 +41,6 @@ io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
   socket.on("start_shell", () => {
-    // Clean up any existing shell process for this socket
     cleanupShellProcess(socket.id);
 
     console.log(`Starting shell process for socket ${socket.id}`);
@@ -49,7 +48,7 @@ io.on("connection", (socket) => {
     try {
       const shellProcess = pty.spawn("/app/shell/shell", [], {
         name: "xterm-color",
-        cwd: "/root/filesystem",
+        cwd: "/home/user/filesystem",
         env: process.env,
       });
 

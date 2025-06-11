@@ -35,9 +35,17 @@ RUN mkdir -p /app/shell
 COPY --from=shell-builder /build/shell /app/shell/shell
 RUN chmod +x /app/shell/shell
 
-RUN mkdir -p /root/filesystem
-COPY portfolio/backend/filesystem/ /root/filesystem/
+RUN mkdir -p /home/user/filesystem
+COPY portfolio/backend/filesystem/ /home/user/filesystem/
+RUN mkdir -p /home/user/filesystem/folder1
+RUN mkdir -p /home/user/filesystem/folder2
+
+RUN useradd -ms /bin/bash user
+USER user
+
+WORKDIR /app
 
 EXPOSE 3001
 
 CMD ["npm", "start"]
+
