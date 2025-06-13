@@ -37,8 +37,9 @@ const PortfolioSite = () => {
         <h2 className="home-subtitle">Full Stack Developer</h2>
         <div style={{ marginBottom: "2rem" }}></div>
         <p className="home-description">
-          This is a simple portfolio to highlight my projects. Navigate to
-          Terminal to try my custom C shell.
+          This is a simple, no-nonsense portfolio site to highlight my projects.
+          Navigate to Terminal to try my custom C shell or Contact to get in
+          touch.
         </p>
         <div style={{ marginBottom: "1rem" }}></div>
         <div className="social-links">
@@ -116,27 +117,34 @@ const PortfolioSite = () => {
         title: "Interactive C Shell",
         description:
           "Custom Unix shell implementation with job control, piping, redirection, and command history.",
-        tech: ["C, ", "Docker, ", "WebSocket"],
+        tech: ["C"],
         codeUrl: "https://github.com/m-olive/shell",
-        demoUrl: "https://your-demo-site.com",
+        demoUrl: "terminal",
       },
       {
         title: "Portfolio Site",
         description:
           "Simple website made in React with Node.js serving an embedded Docker container",
-        tech: ["React, ", "Node.js, ", "Docker"],
+        tech: ["React, ", "Node.js, ", "Docker, ", "WebSocket"],
         codeUrl: "https://github.com/m-olive/site",
-        demoUrl: "https://your-portfolio.com",
+        demoUrl: "http://m-olive.fly.dev",
       },
       {
-        title: "Placeholder",
-        description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        title: "Coming Soon",
+        description: "Java/Spring Boot project in progress",
         tech: ["Java, ", "Spring Boot"],
-        codeUrl: "https://github.com/yourusername/placeholder-project",
-        demoUrl: "",
+        codeUrl: "https://github.com/m-olive",
+        demoUrl: "http://m-olive.fly.dev",
       },
     ];
+
+    const handleDemoClick = (demoUrl) => {
+      if (demoUrl === "terminal") {
+        setActiveSection("terminal");
+      } else {
+        window.open(demoUrl, "_blank", "noopener,noreferrer");
+      }
+    };
 
     return (
       <section className="section projects">
@@ -165,33 +173,23 @@ const PortfolioSite = () => {
                   <div className="project-links">
                     <button
                       className="project-link"
-                      onClick={() => {
-                        if (project.codeUrl) {
-                          window.open(
-                            project.codeUrl,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }
-                      }}
+                      onClick={() =>
+                        window.open(
+                          project.codeUrl,
+                          "_blank",
+                          "noopener,noreferrer",
+                        )
+                      }
                     >
                       <Github size={16} />
-                      <span>Code</span>
+                      <span> Code</span>
                     </button>
                     <button
                       className="project-link"
-                      onClick={() => {
-                        if (project.demoUrl) {
-                          window.open(
-                            project.demoUrl,
-                            "_blank",
-                            "noopener,noreferrer",
-                          );
-                        }
-                      }}
+                      onClick={() => handleDemoClick(project.demoUrl)}
                     >
                       <ExternalLink size={16} />
-                      <span>Demo</span>
+                      <span> Demo</span>
                     </button>
                   </div>
                 </div>
@@ -219,7 +217,7 @@ const PortfolioSite = () => {
 
       if (socket) socket.disconnect();
 
-      console.log("Attempting to connect to WebSocket server...");
+      console.log("Attempting to connect to WebSocket server.");
 
       const newSocket = io("https://m-olive.fly.dev", {
         transports: ["websocket", "polling"],
@@ -231,7 +229,7 @@ const PortfolioSite = () => {
       });
 
       newSocket.on("connect", () => {
-        console.log("Connected to WebSocket server");
+        console.log("Connected to WebSocket server.");
         setIsConnected(true);
         setConnectionError("");
         setSocket(newSocket);
@@ -243,19 +241,19 @@ const PortfolioSite = () => {
         setIsShellRunning(false);
 
         if (reason === "io server disconnect") {
-          setConnectionError("Server disconnected. Attempting to reconnect...");
+          setConnectionError("Server disconnected. Attempting to reconnect.");
         } else if (reason === "transport error") {
-          setConnectionError("Connection lost. Attempting to reconnect...");
+          setConnectionError("Connection lost. Attempting to reconnect.");
         }
       });
 
       newSocket.on("connect_error", (error) => {
         console.error("Connection error:", error);
-        setConnectionError("Failed to connect to server. Retrying...");
+        setConnectionError("Failed to connect to server. Retrying.");
         setIsConnected(false);
 
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log("Attempting manual reconnection...");
+          console.log("Attempting manual reconnection.");
           connectWebSocket();
         }, 5000);
       });
@@ -267,7 +265,7 @@ const PortfolioSite = () => {
 
       newSocket.on("reconnect_error", (error) => {
         console.error("Reconnection failed:", error);
-        setConnectionError("Reconnection failed. Retrying...");
+        setConnectionError("Reconnection failed. Retrying.");
       });
 
       newSocket.on("reconnect_failed", () => {
@@ -323,7 +321,7 @@ const PortfolioSite = () => {
     const startShell = () => {
       if (socket && isConnected) {
         xtermRef.current.clear();
-        xtermRef.current.writeln("Starting shell session...");
+        xtermRef.current.writeln("Starting shell session.");
         setIsShellRunning(true);
         socket.emit("start_shell");
       } else {
@@ -343,18 +341,16 @@ const PortfolioSite = () => {
     };
 
     const manualReconnect = () => {
-      setConnectionError("Reconnecting...");
+      setConnectionError("Reconnecting.");
       connectWebSocket();
     };
-
     return (
-      <section className="section terminal">
+      <section className="section terminal" id="terminal">
         <div className="terminal-content">
           <h2 className="terminal-title">Interactive C Shell</h2>
           <p className="terminal-description">
             Experience my custom C shell running in a secure Docker container
           </p>
-
           <div className="terminal-status">
             <div
               className={`status-indicator ${isConnected ? "connected" : "disconnected"}`}
@@ -365,15 +361,7 @@ const PortfolioSite = () => {
               <div className="connection-error">
                 {connectionError}
                 {!isConnected && (
-                  <button
-                    className="reconnect-btn"
-                    onClick={manualReconnect}
-                    style={{
-                      marginLeft: "10px",
-                      padding: "5px 10px",
-                      fontSize: "12px",
-                    }}
-                  >
+                  <button className="reconnect-btn" onClick={manualReconnect}>
                     Reconnect
                   </button>
                 )}
@@ -390,9 +378,7 @@ const PortfolioSite = () => {
               </button>
             )}
           </div>
-
           <div ref={terminalRef} className="terminal-window"></div>
-
           <div className="terminal-info-panel">
             <h3>Shell Features</h3>
             <div className="feature-list">
@@ -432,46 +418,68 @@ const PortfolioSite = () => {
               <div className="contact-icon">
                 <Mail size={20} />
               </div>
-              <span className="contact-text">matt.d.oliveira@gmail.com</span>
+              <a
+                className="contact-text"
+                href="mailto:matt.d.oliveira@gmail.com"
+              >
+                matt.d.oliveira@gmail.com
+              </a>
             </div>
             <div className="contact-item">
               <div className="contact-icon">
                 <Linkedin size={20} />
               </div>
-              <span className="contact-text">linkedin.com/in/m-olive</span>
+              <a
+                className="contact-text"
+                href="https://linkedin.com/in/m-olive"
+              >
+                linkedin.com/in/m-olive
+              </a>
             </div>
             <div className="contact-item">
               <div className="contact-icon">
                 <Github size={20} />
               </div>
-              <span className="contact-text">github.com/m-olive</span>
+              <a className="contact-text" href="https://github.com/m-olive">
+                github.com/m-olive
+              </a>
             </div>
           </div>
           <div className="contact-form">
-            <div className="form-group">
-              <label className="form-label">Name</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Your name"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-input"
-                placeholder="your.email@example.com"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Message</label>
-              <textarea
-                className="form-textarea"
-                placeholder="Your message"
-              ></textarea>
-            </div>
-            <button className="form-button">Send Message</button>
+            <form action="https://formspree.io/f/mjkrwqyd" method="POST">
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  className="form-input"
+                  placeholder="Your name"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-input"
+                  placeholder="your.email@example.com"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Message</label>
+                <textarea
+                  name="message"
+                  className="form-textarea"
+                  placeholder="Your message"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" className="form-button">
+                Send Message
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -500,7 +508,9 @@ const PortfolioSite = () => {
       <main className="main">
         {activeSection === "home" && <HomeSection />}
         {activeSection === "about" && <AboutSection />}
-        {activeSection === "projects" && <ProjectsSection />}
+        {activeSection === "projects" && (
+          <ProjectsSection setActiveSection={setActiveSection} />
+        )}
         {activeSection === "terminal" && <TerminalSection />}
         {activeSection === "contact" && <ContactSection />}
       </main>
