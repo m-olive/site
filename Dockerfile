@@ -37,10 +37,9 @@ RUN chmod +x /app/shell/shell
 
 RUN mkdir -p /home/user/filesystem
 COPY portfolio/backend/filesystem/ /home/user/filesystem/
-RUN mkdir -p /home/user/filesystem/folder1
-RUN mkdir -p /home/user/filesystem/folder2
+RUN mkdir -p /home/user/filesystem/folder1 /home/user/filesystem/folder2
+RUN useradd -ms /bin/bash user && chown -R user:user /home/user/filesystem
 
-RUN useradd -ms /bin/bash user
 USER user
 
 WORKDIR /app
@@ -48,4 +47,3 @@ WORKDIR /app
 EXPOSE 3001
 
 CMD ["npm", "start"]
-
