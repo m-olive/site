@@ -151,6 +151,8 @@ process.on("SIGINT", () => {
 });
 
 const PORT = process.env.PORT || 3001;
-httpServer.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+const HOST = process.env.HOST || "0.0.0.0";
+
+httpServer.listen(PORT, HOST, () => {
+  console.log(`Server listening on ${HOST}:${PORT}`);
 });
