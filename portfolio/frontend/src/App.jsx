@@ -3,6 +3,7 @@ import "./App.css";
 import { io } from "socket.io-client";
 import "xterm/css/xterm.css";
 import { Terminal as XTerm } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
 
 import {
   Github,
@@ -25,9 +26,9 @@ const HomeSection = ({ setActiveSection }) => (
       <h1 className="home-title">Matt Oliveira</h1>
       <h2 className="home-subtitle">Full Stack Developer</h2>
       <p className="home-description">
-        This is a simple, no-nonsense portfolio site to highlight my projects.
-        Navigate to Terminal to try my custom C shell or Contact to get in
-        touch.
+        This is a simple, no-nonsense portfolio site to highlight who I am.
+        Navigate to Terminal to try my custom C shell and live IRC-style
+        chatroom, or Contact to get in touch.
       </p>
       <div className="social-links">
         <a href="https://github.com/m-olive" className="social-link">
@@ -94,25 +95,26 @@ const projects = [
   {
     title: "Interactive C Shell",
     description:
-      "Custom Unix shell implementation with job control, piping, redirection, and command history.",
+      "Custom Unix shell built from scratch with job control, piping, I/O redirection, background processes, and command history. Handles signal management, process groups, and terminal state. Try it live in the Terminal.",
     tech: ["C"],
     codeUrl: "https://github.com/m-olive/shell",
     demoUrl: "terminal",
   },
   {
-    title: "Portfolio Site",
+    title: "Terminal Chat",
     description:
-      "Simple website made in React with Node.js serving an embedded Docker container",
-    tech: ["React", "Node.js", "Docker", "WebSocket"],
-    codeUrl: "https://github.com/m-olive/site",
-    demoUrl: "http://m-olive.fly.dev",
+      "IRC-style chat server and ncurses TUI client over Unix domain sockets. Single-threaded event loop handles multiple concurrent users. Try it live by typing 'chat' in the Terminal.",
+    tech: ["C", "Unix Sockets", "ncurses"],
+    codeUrl: "https://github.com/m-olive/chat",
+    demoUrl: "terminal",
   },
   {
-    title: "Coming Soon",
-    description: "Java/Spring Boot project in progress",
-    tech: ["Java", "Spring Boot"],
-    codeUrl: "https://github.com/m-olive",
-    demoUrl: "http://m-olive.fly.dev",
+    title: "Portfolio Site",
+    description:
+      "React frontend with a Node.js backend serving an embedded Docker container. Spawns interactive terminal sessions via XTerm.js and node-pty, deployed on Fly.io with multi-stage builds.",
+    tech: ["React", "Node.js", "Docker"],
+    codeUrl: "https://github.com/m-olive/site",
+    demoUrl: "https://m-olive.fly.dev",
   },
 ];
 
@@ -132,43 +134,45 @@ const ProjectsSection = ({ setActiveSection }) => {
         <div className="projects-grid">
           {projects.map((project, index) => (
             <div key={index} className="project-card">
-              <div className="project-header">
-                <div className="project-icon">
-                  <Briefcase size={32} />
+              <div className="project-card-body">
+                <div className="project-header">
+                  <div className="project-icon">
+                    <Briefcase size={32} />
+                  </div>
+                  <h3 className="project-title">{project.title}</h3>
                 </div>
-                <h3 className="project-title">{project.title}</h3>
+                <div className="project-content">
+                  <p className="project-description">{project.description}</p>
+                  <div className="project-tech">
+                    {project.tech.map((tech, techIndex) => (
+                      <span key={techIndex} className="tech-tag">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="project-content">
-                <p className="project-description">{project.description}</p>
-                <div className="project-tech">
-                  {project.tech.map((tech, techIndex) => (
-                    <span key={techIndex} className="tech-tag">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-                <div className="project-links">
-                  <button
-                    className="project-link code-link"
-                    onClick={() =>
-                      window.open(
-                        project.codeUrl,
-                        "_blank",
-                        "noopener,noreferrer",
-                      )
-                    }
-                  >
-                    <Github size={16} />
-                    <span>Code</span>
-                  </button>
-                  <button
-                    className="project-link demo-link"
-                    onClick={() => handleDemoClick(project.demoUrl)}
-                  >
-                    <ExternalLink size={16} />
-                    <span>Demo</span>
-                  </button>
-                </div>
+              <div className="project-links">
+                <button
+                  className="project-link code-link"
+                  onClick={() =>
+                    window.open(
+                      project.codeUrl,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  <Github size={16} />
+                  <span>Code</span>
+                </button>
+                <button
+                  className="project-link demo-link"
+                  onClick={() => handleDemoClick(project.demoUrl)}
+                >
+                  <ExternalLink size={16} />
+                  <span>Demo</span>
+                </button>
               </div>
             </div>
           ))}
@@ -181,6 +185,7 @@ const ProjectsSection = ({ setActiveSection }) => {
 const TerminalSection = () => {
   const terminalRef = useRef(null);
   const xtermRef = useRef(null);
+  const fitAddonRef = useRef(null);
   const socketRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -195,13 +200,30 @@ const TerminalSection = () => {
           "SF Mono, Monaco, Inconsolata, Roboto Mono, Consolas, Courier New, monospace",
         fontSize: 14,
       });
+
+      fitAddonRef.current = new FitAddon();
+      xtermRef.current.loadAddon(fitAddonRef.current);
       xtermRef.current.open(terminalRef.current);
+      fitAddonRef.current.fit();
 
       xtermRef.current.onData((data) => {
         if (socketRef.current?.connected) {
           socketRef.current.emit("shell_input", data);
         }
       });
+
+      const ro = new ResizeObserver(() => {
+        if (fitAddonRef.current) {
+          fitAddonRef.current.fit();
+          if (socketRef.current?.connected && xtermRef.current) {
+            socketRef.current.emit("resize", {
+              cols: xtermRef.current.cols,
+              rows: xtermRef.current.rows,
+            });
+          }
+        }
+      });
+      ro.observe(terminalRef.current);
     }
 
     return () => {
@@ -294,7 +316,10 @@ const TerminalSection = () => {
         xtermRef.current.writeln("Starting shell session.");
       }
       setIsShellRunning(true);
-      socketRef.current.emit("start_shell");
+      socketRef.current.emit("start_shell", {
+        cols: xtermRef.current?.cols || 80,
+        rows: xtermRef.current?.rows || 24,
+      });
     } else {
       const newSocket = connectWebSocket();
       newSocket.on("connect", () => {
@@ -303,7 +328,10 @@ const TerminalSection = () => {
           xtermRef.current.writeln("Starting shell session.");
         }
         setIsShellRunning(true);
-        newSocket.emit("start_shell");
+        newSocket.emit("start_shell", {
+          cols: xtermRef.current?.cols || 80,
+          rows: xtermRef.current?.rows || 24,
+        });
       });
     }
   };
@@ -311,7 +339,10 @@ const TerminalSection = () => {
   const stopShell = () => {
     if (socketRef.current) {
       socketRef.current.emit("end_shell");
+      socketRef.current.disconnect();
+      socketRef.current = null;
       setIsShellRunning(false);
+      setIsConnected(false);
       if (xtermRef.current)
         xtermRef.current.writeln("\r\n[Shell session ended by user]");
     }
@@ -325,9 +356,12 @@ const TerminalSection = () => {
   return (
     <section className="section terminal" id="terminal">
       <div className="terminal-content">
-        <h2 className="terminal-title">Interactive C Shell</h2>
+        <h2 className="terminal-title">Interactive C Shell and Live Chat</h2>
         <p className="terminal-description">
-          Experience my custom C shell running in a secure Docker container
+          A custom C shell running in a secure Docker container with job
+          control, piping, and I/O redirection. Type <code className="inline-code">chat</code> to
+          join a live multi-user chatroom built on Unix domain sockets
+          and a single-threaded poll event loop.
         </p>
         <div className="terminal-status">
           {isConnected && (
@@ -355,15 +389,28 @@ const TerminalSection = () => {
           )}
         </div>
         <div ref={terminalRef} className="terminal-window"></div>
-        <div className="terminal-info-panel">
-          <h3>Shell Features</h3>
-          <div className="feature-list">
-            <span className="feature-item">Built-ins (cd, echo, exit, etc)</span>
-            <span className="feature-item">Job Control (jobs, fg, bg)</span>
-            <span className="feature-item">Command History (history, !!, !n)</span>
-            <span className="feature-item">Pipes and Redirection (|, &gt;, &gt;&gt;, &lt;)</span>
-            <span className="feature-item">Background Jobs (&amp;)</span>
-            <span className="feature-item">Secure Docker Container</span>
+        <div className="terminal-panels">
+          <div className="terminal-info-panel">
+            <h3>Shell Features</h3>
+            <div className="feature-list">
+              <span className="feature-item">Built-ins (cd, echo, exit, etc)</span>
+              <span className="feature-item">Job Control (jobs, fg, bg)</span>
+              <span className="feature-item">Command History (history, !!, !n)</span>
+              <span className="feature-item">Pipes and Redirection (|, &gt;, &gt;&gt;, &lt;)</span>
+              <span className="feature-item">Background Jobs (&amp;)</span>
+              <span className="feature-item">Secure Docker Container</span>
+            </div>
+          </div>
+          <div className="terminal-info-panel">
+            <h3>Live Chat</h3>
+            <div className="feature-list">
+              <span className="feature-item">Multi-user broadcast over Unix sockets</span>
+              <span className="feature-item">Single-threaded poll event loop</span>
+              <span className="feature-item">Ncurses TUI with scrolling chat window</span>
+              <span className="feature-item">/nick to set your name, /menu for help</span>
+              <span className="feature-item">/exit or Ctrl+C to disconnect cleanly</span>
+              <span className="feature-item">Up to 50 concurrent users</span>
+            </div>
           </div>
         </div>
       </div>

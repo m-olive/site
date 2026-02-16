@@ -3,6 +3,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const pty = require("node-pty");
 const cors = require("cors");
+const { spawn } = require("child_process");
 
 const app = express();
 const httpServer = createServer(app);
@@ -20,6 +21,25 @@ app.use(express.json());
 app.use(express.static("public"));
 
 const shellProcesses = new Map();
+
+// Start the chat server as a background process
+let chatServerProcess = null;
+const startChatServer = () => {
+  const chatServerPath = "/app/chat/chat-server";
+  try {
+    chatServerProcess = spawn(chatServerPath, [], {
+      stdio: "ignore",
+    });
+    console.log(`Chat server started (pid: ${chatServerProcess.pid})`);
+    chatServerProcess.on("exit", (code, signal) => {
+      console.log(`Chat server exited (code: ${code}, signal: ${signal})`);
+      chatServerProcess = null;
+    });
+  } catch (error) {
+    console.error(`Failed to start chat server: ${error.message}`);
+  }
+};
+startChatServer();
 
 const cleanupShellProcess = (socketId) => {
   const shellProcess = shellProcesses.get(socketId);
@@ -40,16 +60,21 @@ const cleanupShellProcess = (socketId) => {
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
-  socket.on("start_shell", () => {
+  socket.on("start_shell", (opts) => {
     cleanupShellProcess(socket.id);
 
-    console.log(`Starting shell process for socket ${socket.id}`);
+    const cols = opts?.cols || 80;
+    const rows = opts?.rows || 24;
+
+    console.log(`Starting shell process for socket ${socket.id} (${cols}x${rows})`);
 
     try {
       const shellProcess = pty.spawn("/app/shell/shell", [], {
         name: "xterm-color",
+        cols,
+        rows,
         cwd: "/home/user/filesystem",
-        env: process.env,
+        env: { ...process.env, TERM: "xterm-color" },
       });
 
       shellProcesses.set(socket.id, shellProcess);
@@ -109,6 +134,17 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("resize", ({ cols, rows }) => {
+    const shellProcess = shellProcesses.get(socket.id);
+    if (shellProcess && !shellProcess.killed && cols > 0 && rows > 0) {
+      try {
+        shellProcess.resize(cols, rows);
+      } catch (error) {
+        console.error(`Error resizing shell for socket ${socket.id}:`, error);
+      }
+    }
+  });
+
   socket.on("end_shell", () => {
     console.log(`Ending shell for socket ${socket.id}`);
     cleanupShellProcess(socket.id);
@@ -124,31 +160,30 @@ io.on("connection", (socket) => {
   });
 });
 
-process.on("SIGTERM", () => {
-  console.log("Received SIGTERM, cleaning up...");
+const gracefulShutdown = (signal) => {
+  console.log(`Received ${signal}, cleaning up...`);
 
-  for (const [socketId, shellProcess] of shellProcesses) {
+  for (const [socketId] of shellProcesses) {
     cleanupShellProcess(socketId);
+  }
+
+  if (chatServerProcess) {
+    try {
+      process.kill(chatServerProcess.pid, "SIGTERM");
+      console.log("Chat server stopped");
+    } catch (error) {
+      console.error(`Error stopping chat server: ${error.message}`);
+    }
   }
 
   httpServer.close(() => {
     console.log("Server closed");
     process.exit(0);
   });
-});
+};
 
-process.on("SIGINT", () => {
-  console.log("Received SIGINT, cleaning up...");
-
-  for (const [socketId, shellProcess] of shellProcesses) {
-    cleanupShellProcess(socketId);
-  }
-
-  httpServer.close(() => {
-    console.log("Server closed");
-    process.exit(0);
-  });
-});
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || "0.0.0.0";
