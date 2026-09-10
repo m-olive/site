@@ -221,25 +221,16 @@ body {
   padding: 1.5rem;
   background: #252525;
   border-radius: 12px;
-  border: 1px solid #3a3a3a;
+  border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.skill-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #059669, #0891b2);
-}
 
 .skill-item:hover {
   transform: translateY(-5px);
-  border-color: #4a4a4a;
+  border-color: #059669;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
@@ -251,7 +242,7 @@ body {
 
 .project-card {
   background: #252525;
-  border: 1px solid #3a3a3a;
+  border: 1px solid rgba(5, 150, 105, 0.35);
   border-radius: 16px;
   padding: 2rem;
   transition: all 0.3s ease;
@@ -269,19 +260,10 @@ body {
 
 .project-card:hover {
   transform: translateY(-5px);
-  border-color: #4a4a4a;
+  border-color: #059669;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
-.project-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #059669, #0891b2);
-}
 
 .project-header {
   display: flex;
@@ -450,22 +432,12 @@ body {
   width: 100%;
   background: #0d1117;
   border-radius: 12px;
-  border: 1px solid #30363d;
+  border: 1px solid rgba(5, 150, 105, 0.35);
   overflow: hidden;
   position: relative;
   padding-top: 8px;
 }
 
-.terminal-window::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #059669, #0891b2);
-  z-index: 1;
-}
 
 .terminal-panels {
   display: flex;
@@ -478,24 +450,15 @@ body {
   padding: 1.5rem;
   background: #161b22;
   border-radius: 12px;
-  border: 1px solid #30363d;
+  border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.terminal-info-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #059669, #0891b2);
-}
 
 .terminal-info-panel:hover {
-  border-color: #4a4a4a;
+  border-color: #059669;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
@@ -585,24 +548,15 @@ body {
   background: #252525;
   padding: 2rem;
   border-radius: 16px;
-  border: 1px solid #3a3a3a;
+  border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.contact-form::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #059669, #0891b2);
-}
 
 .contact-form:hover {
-  border-color: #4a4a4a;
+  border-color: #059669;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
