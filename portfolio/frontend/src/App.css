@@ -224,6 +224,7 @@ body {
   border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
 }
 
@@ -231,7 +232,7 @@ body {
 .skill-item:hover {
   transform: translateY(-5px);
   border-color: #059669;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.35);
 }
 
 .projects-grid {
@@ -245,6 +246,7 @@ body {
   border: 1px solid rgba(5, 150, 105, 0.35);
   border-radius: 16px;
   padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -261,7 +263,7 @@ body {
 .project-card:hover {
   transform: translateY(-5px);
   border-color: #059669;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.35);
 }
 
 
@@ -278,7 +280,8 @@ body {
   justify-content: center;
   width: 50px;
   height: 50px;
-  background: #3a3a3a;
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.25);
   border-radius: 12px;
   color: #059669;
 }
@@ -312,13 +315,13 @@ body {
 }
 
 .tech-tag {
-  background: #1a1a1a;
+  background: rgba(5, 150, 105, 0.08);
   color: #059669;
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  border: 1px solid #2a2a2a;
+  border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
 .project-links {
@@ -453,13 +456,14 @@ body {
   border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
 }
 
 
 .terminal-info-panel:hover {
   border-color: #059669;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.35);
 }
 
 .terminal-info-panel h3 {
@@ -551,13 +555,14 @@ body {
   border: 1px solid rgba(5, 150, 105, 0.35);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
 }
 
 
 .contact-form:hover {
   border-color: #059669;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 28px -8px rgba(5, 150, 105, 0.35);
 }
 
 .contact-text {
