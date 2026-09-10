@@ -247,7 +247,7 @@ const TerminalSection = () => {
 
 		if (socketRef.current) socketRef.current.disconnect();
 
-		const newSocket = io("https://m-olive.fly.dev", {
+		const newSocket = io({
 			transports: ["websocket", "polling"],
 			timeout: 10000,
 			reconnection: true,
